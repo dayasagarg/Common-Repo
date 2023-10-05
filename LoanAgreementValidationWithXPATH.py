@@ -13,11 +13,11 @@ import json
 # JSON reader
 file = open("input.json")
 info = json.load(file)
-email = info["user1"]["email"]
-password = info["user1"]["password"]
-otp = info["user1"]["otp"]
-loanID = info["user1"]["loanID"]
-loanPdf = info["user1"]["loanPdf"]
+email = info["user5"]["email"]
+password = info["user5"]["password"]
+otp = info["user5"]["otp"]
+loanID = info["user5"]["loanID"]
+loanPdf = info["user5"]["loanPdf"]
 
 
 # PDF reader
@@ -40,21 +40,21 @@ class TestDashRepo:
         driver.implicitly_wait(5)
         driver.get("https://lendittfinserve.com/lenditt/#/dashboard") # url
         time.sleep(1)
-        driver.find_element(By.ID, "email").send_keys(email) #email
+        driver.find_element(By.XPATH, "//input[@type='email']").send_keys(email) #email
         # time.sleep(1)
-        driver.find_element(By.ID, "login-btn").click() #button
+        driver.find_element(By.XPATH, "/html/body/app-root/app-auth/div/div[2]/div/div/form/div/button").click()
         # time.sleep(1)
-        driver.find_element(By.ID, "login-password").send_keys(password) #password
+        driver.find_element(By.XPATH, "//input[@type='password']").send_keys(password) #password
         # time.sleep(1)
-        driver.find_element(By.ID, "login-btn2").click() #button
+        driver.find_element(By.XPATH, "/html/body/app-root/app-auth/div/div[2]/div/div/form/div[2]/button").click()
+        time.sleep(25)
+        # driver.find_element(By.XPATH, "//input[@type='text']").send_keys(otp) #otp
         # time.sleep(1)
-        driver.find_element(By.ID, "OTP").send_keys(otp) #otp
-        # time.sleep(1)
-        element = driver.find_element(By.ID, "login-btn2") #button
+        element = driver.find_element(By.XPATH, "/html/body/app-root/app-auth/div/div[2]/div/div/form/div[2]/button")
         # time.sleep(1)
         driver.execute_script("arguments[0].scrollIntoView();", element)
         # time.sleep(1)
-        driver.find_element(By.ID,"login-btn2").click() #button
+        driver.find_element(By.CSS_SELECTOR,"body > app-root > app-auth > div > div:nth-child(2) > div > div > form > div.submit-btn.margin-top-bottom.d-flex.justify-content-center.ng-star-inserted > button").click()
         time.sleep(1)
         yield
         time.sleep(1)
@@ -64,9 +64,9 @@ class TestDashRepo:
 
 
     def test_keyFactStatement(self, setup_teardown):
-        driver.find_element(By.ID, "mainSearch").send_keys(loanID)  # search box
+        driver.find_element(By.ID, "mainSearch").send_keys(loanID)  #
         time.sleep(2)
-        driver.find_element(By.ID, "master-search-name-mobile").click()  #click user
+        driver.find_element(By.XPATH, "(//span[contains(@class,'mat-option-text')])").click()  #click user
         time.sleep(2)
         driver.switch_to.window(driver.window_handles[-1])
         time.sleep(1)
@@ -75,7 +75,7 @@ class TestDashRepo:
         '''SCHEDULE-CUM-KEY FACT STATEMENT'''
 
         # Name of Borrower
-        profileName = driver.find_element(By.ID,"user-full-name").text
+        profileName = driver.find_element(By.XPATH,"(//div[contains(@class,'profile-details')])/div[1]").text
         time.sleep(2)
         print(f"### 'profileName':'{profileName}' ###")
         time.sleep(1)
@@ -98,7 +98,7 @@ class TestDashRepo:
 
 
         # #loanId
-        loanId = driver.find_element(By.XPATH,"//div//table[@id='loanDetails']//tbody[1]//tr[1]//td//a").text
+        loanId = driver.find_element(By.XPATH,"//tr[contains(@class,'mat-row cdk-row loan-history-row bg-greywhite ng-star-inserted')]//td//a").text
         time.sleep(2)
         if loanId in firstPage:
             print(f" *** 'loanId' :'{loanId}' is matched with KEY FACT STATEMENT in first Page of pdf *** ")
@@ -110,7 +110,7 @@ class TestDashRepo:
 
         # Date of Signing
         try:
-            loanAppDate = driver.find_element(By.XPATH, "(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[5]").text
+            loanAppDate = driver.find_element(By.XPATH, "(//div[@class='mobile-text fnt-size-12 ng-star-inserted'])[2]").text
             time.sleep(1)
             LoanApplicationDate = loanAppDate.replace('/','-')
 
@@ -121,7 +121,7 @@ class TestDashRepo:
 
         except:
             try:
-                loanAppDate = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[5]").text
+                loanAppDate = driver.find_element(By.XPATH,"(//div[@class='mobile-text fnt-size-12 ng-star-inserted'])[3]").text
                 time.sleep(1)
                 LoanApplicationDate = loanAppDate.replace('/', '-')
 
@@ -146,7 +146,7 @@ class TestDashRepo:
 
         '''LOAN DETAILS'''
         # # Loan Amount
-        apprAmount = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[8]").text
+        apprAmount = driver.find_element(By.XPATH,"//tr[contains(@class,'mat-row cdk-row loan-history-row bg-greywhite ng-star-inserted')]//td[8]//div").text
         time.sleep(2)
         lSpace = apprAmount.replace(" ","")
         approvedAmount = lSpace + '.00/-'
@@ -160,7 +160,7 @@ class TestDashRepo:
 
 
         # Interest Rate (per Day)
-        loanIntPerDay = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[7]").text
+        loanIntPerDay = driver.find_element(By.XPATH,"//td[contains(@class,'mat-cell cdk-cell mobile-text fnt-size-12 cdk-column-loanInterest mat-column-loanInterest ng-star-inserted')]").text
         time.sleep(1)
         loanInterestPerDay = loanIntPerDay.replace(" %","00%")
         loanInterestPerDay2 = loanIntPerDay.replace(" %", "%")
@@ -213,7 +213,7 @@ class TestDashRepo:
 
 
         # # Insurance premium amount
-        inPremAmount = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[9]").text
+        inPremAmount = driver.find_element(By.XPATH,"//tr[contains(@class,'mat-row cdk-row loan-history-row bg-greywhite ng-star-inserted')]//td[9]//div").text
         time.sleep(1)
         insurancePremAmount = inPremAmount.replace(" ","")
         if insurancePremAmount in firstPage:
@@ -225,7 +225,7 @@ class TestDashRepo:
 
 
         # # # Loan Tenure
-        loanDurInDays = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[15]").text
+        loanDurInDays = driver.find_element(By.XPATH,"//td[contains(@class,'mat-cell cdk-cell mobile-text fnt-size-12 cdk-column-loanDuration mat-column-loanDuration ng-star-inserted')]").text
         time.sleep(1)
         loanDurationInDays = loanDurInDays + " Days"
         if loanDurationInDays in firstPage:
@@ -237,7 +237,7 @@ class TestDashRepo:
 
 
         # # Loan Start Date
-        loanDisbDate = driver.find_element(By.XPATH,"(//div//table[@id='loanDetails']//tbody[1]//tr[1]//td)[6]").text
+        loanDisbDate = driver.find_element(By.XPATH,"//td[contains(@class,'mat-cell cdk-cell cdk-column-loanStartDate mat-column-loanStartDate ng-star-inserted')]//div").text
         time.sleep(1)
         loanDisbursedDate = loanDisbDate.replace("/","-")
 
